@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>ping test</title>
+  </head>
+  <body>
+    <div class="pingContainer">
+      <div class="ping">900</div>
+    </div>
+  </body>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    .pingContainer {
+      background: rgba(199, 189, 53, 0.2);
+      border: 1px solid;
+      color: black;
+      height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .ping {
+      font-size: 30px;
+      font-weight: 800;
+    }
+  </style>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0.0/jquery.counterup.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.js"></script>
+</html>
+
+<script>
+  var ping = $(".ping");
+  var pingContainer = $(".pingContainer");
+
+  ping.html("0");
+
+  var socket = io(":3000");
+  var startTime;
+  function update() {
+    var pingValue = ping.html();
+    if (pingValue < 31) {
+      ping.css({ color: "green" });
+      pingContainer.css({ background: "rgba(199, 189, 53, 0.2" });
+    } else if (pingValue > 31 && pingValue < 60) {
+      ping.css({ color: "white" });
+      pingContainer.css({ background: "black" });
+    } else {
+      ping.css({ color: "red" });
+
+      pingContainer.css({ background: "black" });
+    }
+    startTime = Date.now();
+    socket.emit("ping");
+    time = 60;
+  }
+
+  socket.on("pong", function() {
+    latency = Date.now() - startTime;
+    ping.html(latency).counterUp({ delay: 10, time: 100 });
+  });
+  setInterval(update, 1000 / 60);
+</script>
